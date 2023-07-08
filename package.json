@@ -1,0 +1,21 @@
+{
+  "name": "lh-react",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --force"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/core": "^7.22.8",
+    "@babel/plugin-transform-react-jsx": "^7.22.5",
+    "@vitejs/plugin-react": "^4.0.2",
+    "@vitejs/plugin-react-swc": "^3.3.2",
+    "esbuild-darwin-arm64": "^0.15.18",
+    "vite": "^4.4.2"
+  }
+}
