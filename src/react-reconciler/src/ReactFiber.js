@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-09 11:22:35
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-12 13:51:14
+ * @LastEditTime: 2023-07-13 15:44:56
  * @Email: 17719495105@163.com
  */
 import { HostRoot } from './ReactWorkTags'
@@ -26,7 +26,7 @@ export function FiberNode(tag, pendingProps, key) {
     this.sibling = null // 指向弟弟
     // 虚拟dom会提供pendingProps用来创建fiber节点的属性
     this.pendingProps = pendingProps // 等待生效的属性
-    this.memozedProps = null  // 已经生效的属性
+    this.memoizedProps = null  // 已经生效的属性
     // 每个fiber还会有自己的状态每一种fiber状态存的类型不一样
     //类组件存的是类的实例 HostRoot存的是渲染的元素
     this.memozedState = null
@@ -44,4 +44,33 @@ export function createFiber(tag, pendingProps, key) {
 }
 export function createHostRootFiber() {
     return createFiber(HostRoot, null, null)
+}
+/**
+ * @description: 基于老的fiber和新的属性创建新的fiber
+ * @param {*} current 老的fiber
+ * @param {*} penddingProps 新属性
+ * @return {*}
+ */
+export function createWorkInProgress(current, pendingProps) {
+    let workInProgress = current.alternate
+    if (workInProgress ===   null) {
+        workInProgress = createFiber(current.tag, pendingProps, current.key)
+        workInProgress.type = current.type
+        workInProgress.stateNode = current.stateNode
+        workInProgress.alternate = current
+        current.alternate = workInProgress
+    } else {
+        workInProgress.pendingProps = pendingProps
+        workInProgress.type = current.type
+        workInProgress.flags = NoFlags
+        workInProgress.subtreeFlags = NoFlags
+
+    }
+    workInProgress.child = current.child
+    workInProgress.memoizedProps = current.memoizedProps
+    workInProgress.memoizedState = current.memoizedState
+    workInProgress.updateQueue = current.updateQueue
+    workInProgress.sibling = current.sibling
+    workInProgress.index = current.index
+    return workInProgress
 }
