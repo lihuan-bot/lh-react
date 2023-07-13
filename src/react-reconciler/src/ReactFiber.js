@@ -2,10 +2,12 @@
  * @Author: lihuan
  * @Date: 2023-07-09 11:22:35
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-09 12:38:24
+ * @LastEditTime: 2023-07-12 13:51:14
  * @Email: 17719495105@163.com
  */
 import { HostRoot } from './ReactWorkTags'
+
+import { NoFlags } from './ReactFiberFlags'
 /**
  * 
  * @param {*} tag  函数组件0 类组件1 原生组件5 根元素3
