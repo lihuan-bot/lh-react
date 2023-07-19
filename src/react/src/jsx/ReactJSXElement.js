@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-08 11:46:07
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-09 01:30:57
+ * @LastEditTime: 2023-07-19 09:26:06
  * @Email: 17719495105@163.com
  */
 import hasOwnProperty from 'shared/hasOwnProperty'
@@ -23,7 +23,7 @@ function hasValidRef(config) {
 function ReactElement(type, key, ref, props) {
     // react元素 也是虚拟dom
     return {
-        $$type: REACT_ELEMENT_TYPE,
+        $$typeof: REACT_ELEMENT_TYPE,
         type,
         key,
         ref,

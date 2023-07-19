@@ -2,13 +2,13 @@
  * @Author: lihuan
  * @Date: 2023-07-13 16:51:46
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-16 22:35:20
+ * @LastEditTime: 2023-07-19 09:06:28
  * @Email: 17719495105@163.com
  */
 import logger from 'shared/logger'
 import { HostComponent, HostRoot } from './ReactWorkTags';
 import { processUpdateQueue } from './ReactFiberClassUpdateQueue'
-import { mountChildFibers, removeChildFibers } from './ReactChildFiber'
+import { mountChildFibers, reconcileChildFibers } from './ReactChildFiber'
 /**
  * @description: 根据新的虚拟dom生成新的fiber链表
  * @param {*} current 父fiber
@@ -30,7 +30,7 @@ function updateHostRoot(current, workInProgress) {
     const nextState = workInProgress.memoizedState
     const nextChildren = nextState.element
     // 协调子节点
-    reconcilerChildren(current, workInProgress, nextChildren)
+    reconcileChildren(current, workInProgress, nextChildren)
     return workInProgress.child
 
 }

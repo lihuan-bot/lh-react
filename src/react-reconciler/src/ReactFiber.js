@@ -2,10 +2,10 @@
  * @Author: lihuan
  * @Date: 2023-07-09 11:22:35
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-13 15:44:56
+ * @LastEditTime: 2023-07-19 09:39:32
  * @Email: 17719495105@163.com
  */
-import { HostRoot } from './ReactWorkTags'
+import { HostComponent, HostRoot, IndeterminateComponent } from './ReactWorkTags'
 
 import { NoFlags } from './ReactFiberFlags'
 /**
@@ -73,4 +73,27 @@ export function createWorkInProgress(current, pendingProps) {
     workInProgress.sibling = current.sibling
     workInProgress.index = current.index
     return workInProgress
+}
+/**
+ * @description: 根据虚拟节点创建fiber
+ * @param {*} element
+ * @return {*}
+ */
+export function createFiberFromElement(element) {
+    const { type, key } = element
+    const { penddingProps } = element.props
+    return createFiberFromTypeAndProps(type, key, penddingProps)
+
+
+}
+
+function createFiberFromTypeAndProps(type, key, penddingProps) {
+    let tag = IndeterminateComponent
+    // fiber是一个原生组件  span p div
+    if (typeof type === 'string') {
+        tag = HostComponent
+    }
+    const fiber = createFiber(tag, penddingProps, key)
+    fiber.type = type
+    return fiber
 }
