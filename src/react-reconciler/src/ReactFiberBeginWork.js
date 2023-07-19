@@ -2,13 +2,14 @@
  * @Author: lihuan
  * @Date: 2023-07-13 16:51:46
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-19 09:06:28
+ * @LastEditTime: 2023-07-19 13:45:09
  * @Email: 17719495105@163.com
  */
 import logger from 'shared/logger'
-import { HostComponent, HostRoot } from './ReactWorkTags';
+import { HostComponent, HostRoot, HostText } from './ReactWorkTags';
 import { processUpdateQueue } from './ReactFiberClassUpdateQueue'
 import { mountChildFibers, reconcileChildFibers } from './ReactChildFiber'
+import { shouldSetTextContent } from 'react-dom-bindings/src/ReactDomHostConfig'
 /**
  * @description: 根据新的虚拟dom生成新的fiber链表
  * @param {*} current 父fiber
@@ -35,7 +36,16 @@ function updateHostRoot(current, workInProgress) {
 
 }
 function updateHostComponent(current, workInProgress) {
-
+    const { type } = workInProgress
+    const nextProps = workInProgress.pendingProps
+    let nextChildren = nextProps.children
+    // 判断当前节点是不是一个单独文本
+    const isDirectTextChild = shouldSetTextContent(type, nextProps)
+    if (isDirectTextChild) {
+        nextChildren = null
+    }
+    reconcileChildren(current, workInProgress, nextChildren)
+    return workInProgress.child
 }
 /**
  * @description: 目标根据新的虚拟dom构建新的fiber子链表 child.sibling

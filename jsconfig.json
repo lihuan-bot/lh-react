@@ -12,7 +12,10 @@
                 "src/react-reconciler/*"
             ],
             "scheduler/*": [
-                "scheduler/*"
+                "src/scheduler/*"
+            ],
+            "react-dom-bindings/*": [
+                "src/react-dom-bindings/*"
             ],
             "shared/*": [
                 "src/shared/*"

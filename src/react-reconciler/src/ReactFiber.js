@@ -2,10 +2,10 @@
  * @Author: lihuan
  * @Date: 2023-07-09 11:22:35
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-19 09:39:32
+ * @LastEditTime: 2023-07-19 13:43:36
  * @Email: 17719495105@163.com
  */
-import { HostComponent, HostRoot, IndeterminateComponent } from './ReactWorkTags'
+import { HostComponent, HostRoot, IndeterminateComponent, HostText } from './ReactWorkTags'
 
 import { NoFlags } from './ReactFiberFlags'
 /**
@@ -37,6 +37,7 @@ export function FiberNode(tag, pendingProps, key) {
     // 子节点副作用标识
     this.subtreeFlags = NoFlags
     this.alternate = null
+    this.index = 0
 }
 export function createFiber(tag, pendingProps, key) {
     return new FiberNode(tag, pendingProps, key)
@@ -80,9 +81,8 @@ export function createWorkInProgress(current, pendingProps) {
  * @return {*}
  */
 export function createFiberFromElement(element) {
-    const { type, key } = element
-    const { penddingProps } = element.props
-    return createFiberFromTypeAndProps(type, key, penddingProps)
+    const { type, key, props } = element
+    return createFiberFromTypeAndProps(type, key, props)
 
 
 }
@@ -96,4 +96,10 @@ function createFiberFromTypeAndProps(type, key, penddingProps) {
     const fiber = createFiber(tag, penddingProps, key)
     fiber.type = type
     return fiber
+}
+
+export function createFiberFroText(content) {
+    const fiber = createFiber(HostText, content, null)
+    return fiber
+
 }
