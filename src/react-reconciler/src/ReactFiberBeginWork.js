@@ -2,10 +2,10 @@
  * @Author: lihuan
  * @Date: 2023-07-13 16:51:46
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-19 13:45:09
+ * @LastEditTime: 2023-07-20 14:22:21
  * @Email: 17719495105@163.com
  */
-import logger from 'shared/logger'
+import logger,{ indent } from 'shared/logger'
 import { HostComponent, HostRoot, HostText } from './ReactWorkTags';
 import { processUpdateQueue } from './ReactFiberClassUpdateQueue'
 import { mountChildFibers, reconcileChildFibers } from './ReactChildFiber'
@@ -53,7 +53,9 @@ function updateHostComponent(current, workInProgress) {
  * @param {*} workInProgress 新fiber
  * @return {*}
  */
-export function beginWork(current,workInProgress) {
+export function beginWork(current, workInProgress) {
+    logger(' '.repeat(indent.number) + 'beginWork', workInProgress)
+    indent.number += 2
     switch (workInProgress.tag) {
         case HostRoot:
             return updateHostRoot(current, workInProgress)
