@@ -2,12 +2,12 @@
  * @Author: lihuan
  * @Date: 2023-07-20 09:43:01
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-21 10:18:24
+ * @LastEditTime: 2023-07-22 22:08:37
  * @Email: 17719495105@163.com
  */
 import logger, { indent } from 'shared/logger'
-import { HostComponent, HostText } from './ReactWorkTags';
-import { createTextInstance, createInstance, appendInitialChild, finalizeInitialChildren } from 'react-dom-bindings/src/client/ReactDomHostConfig'
+import { HostComponent, HostText, HostRoot } from './ReactWorkTags';
+import { createTextInstance, createInstance, appendInitialChild, finalizeInitialChildren } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
 import { NoFlags } from './ReactFiberFlags';
 /**
  * @description: 把当前完成的fiber所有子节点对应的真实dom挂到自己父parent真实dom节点上
@@ -26,8 +26,14 @@ function appendAllChildren(parent, workInProgress) {
             node = node.child
             continue
         }
+        if (node === workInProgress) {
+            return;
+          }
         // 如果当前节点没有弟弟
         while (node.sibling === null) {
+            if (node.return === null || node.return === workInProgress) {
+                return;
+              }
             // 回到父节点
             node = node.return
         }
@@ -45,6 +51,9 @@ export function completeWork(current, workInProgress) {
     logger(' '.repeat(indent.number) + 'completeWork', workInProgress)
     const newProps = workInProgress.pendingProps
     switch (workInProgress.tag) {
+        case HostRoot:
+            bubbleProperties(workInProgress);
+            break;
         case HostComponent:
             // 目前只是挂载和创建 后面要区分初次挂载和更新
             const { type } = workInProgress
@@ -53,22 +62,22 @@ export function completeWork(current, workInProgress) {
             appendAllChildren(instance,workInProgress)
             workInProgress.stateNode = instance
             finalizeInitialChildren(instance,type,newProps)
-            bubbleProprieties(workInProgress)
-            case HostText:
+            bubbleProperties(workInProgress)
+            break
+        case HostText:
             // 如果完成的fiber节点是一个文本节点 那就创建真实的文本节点
             const newText = newProps
             // 创建真实的dom节点并插入stateNode
             workInProgress.stateNode = createTextInstance(newText)
             // 向上冒泡
-            bubbleProprieties(workInProgress)
+            bubbleProperties(workInProgress)
             break;
-    
         default:
             break;
     }
 }
 
-function bubbleProprieties(completedWork) {
+function bubbleProperties(completedWork) {
     let subtreeFlags = NoFlags
     let child = completedWork.child
     // 遍历当前fiber所有子节点，把所有子节点的副作用，以及子节点的子节点的副作用全部合并

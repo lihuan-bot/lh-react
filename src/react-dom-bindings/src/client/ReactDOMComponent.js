@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-21 10:17:03
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-21 10:43:21
+ * @LastEditTime: 2023-07-21 14:03:34
  * @Email: 17719495105@163.com
  */
 import { setValueForStyles } from './CSSPropertyOperations'
@@ -17,9 +17,12 @@ function setInitialDOMProperties(tag,domElement,nextProps) {
             if (propKey === STYLE) {
                 setValueForStyles(domElement,nextProp)
             } else if (propKey === CHILDREN) {
-                if (typeof nextProps === 'string') {
-                 setTextContent(domElement, `${nextProp}`)
+                if (typeof nextProp === 'string') {
+                 setTextContent(domElement,nextProp)
+                } else if (typeof nextProp === 'number') {
+                    setTextContent(domElement, `${nextProp}`)
                 }
+                
             } else if (nextProp !== null) {
                 setValueForProperty(domElement,propKey,nextProp)
             }

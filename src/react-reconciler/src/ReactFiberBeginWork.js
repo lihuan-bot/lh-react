@@ -2,14 +2,14 @@
  * @Author: lihuan
  * @Date: 2023-07-13 16:51:46
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-20 14:22:21
+ * @LastEditTime: 2023-07-21 14:11:09
  * @Email: 17719495105@163.com
  */
 import logger,{ indent } from 'shared/logger'
 import { HostComponent, HostRoot, HostText } from './ReactWorkTags';
 import { processUpdateQueue } from './ReactFiberClassUpdateQueue'
 import { mountChildFibers, reconcileChildFibers } from './ReactChildFiber'
-import { shouldSetTextContent } from 'react-dom-bindings/src/ReactDomHostConfig'
+import { shouldSetTextContent } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
 /**
  * @description: 根据新的虚拟dom生成新的fiber链表
  * @param {*} current 父fiber

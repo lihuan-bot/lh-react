@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-19 13:23:49
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-21 10:46:44
+ * @LastEditTime: 2023-07-22 22:08:55
  * @Email: 17719495105@163.com
  */
 import { setInitialProperties } from './ReactDOMComponent'
@@ -15,9 +15,9 @@ export function createTextInstance(content) {
 }
 
 export function createInstance(type, props) {
-    const document = document.createElement(type)
+    const domElement = document.createElement(type)
     // TODO: 更新属性
-    return document
+    return domElement
 }
 
 export function appendInitialChild(parent, child) {
@@ -27,4 +27,8 @@ export function appendInitialChild(parent, child) {
 export function finalizeInitialChildren(domElement, type, props) {
     setInitialProperties(domElement, type, props)
     
+}
+
+export function appendChild(parentInstance, child) {
+    parentInstance.appendChild(child)
 }
