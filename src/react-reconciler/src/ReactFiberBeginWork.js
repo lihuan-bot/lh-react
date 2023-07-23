@@ -2,14 +2,15 @@
  * @Author: lihuan
  * @Date: 2023-07-13 16:51:46
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-21 14:11:09
+ * @LastEditTime: 2023-07-23 16:43:36
  * @Email: 17719495105@163.com
  */
 import logger,{ indent } from 'shared/logger'
-import { HostComponent, HostRoot, HostText } from './ReactWorkTags';
+import { HostComponent, HostRoot, HostText, FunctionComponent, IndeterminateComponent } from './ReactWorkTags';
 import { processUpdateQueue } from './ReactFiberClassUpdateQueue'
 import { mountChildFibers, reconcileChildFibers } from './ReactChildFiber'
 import { shouldSetTextContent } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
+import { renderWithHooks } from './ReactFiberHooks'
 /**
  * @description: 根据新的虚拟dom生成新的fiber链表
  * @param {*} current 父fiber
@@ -48,6 +49,21 @@ function updateHostComponent(current, workInProgress) {
     return workInProgress.child
 }
 /**
+ * @description: 挂载函数组件
+ * @param {*} current 老fiber
+ * @param {*} workInProgress 新fiber
+ * @param {*} Component 组件的类型 
+ * @return {*}
+ */
+export function mountIndeterminateComponent(current, workInProgress, Component) {
+    const props = workInProgress.pendingProps
+    // const value = Component(props)
+    const value = renderWithHooks(current, workInProgress, Component,props)
+    workInProgress.tag = FunctionComponent
+    reconcileChildren(current, workInProgress, value)
+    return workInProgress.child
+}
+/**
  * @description: 目标根据新的虚拟dom构建新的fiber子链表 child.sibling
  * @param {*} current 老fiber
  * @param {*} workInProgress 新fiber
@@ -57,6 +73,9 @@ export function beginWork(current, workInProgress) {
     logger(' '.repeat(indent.number) + 'beginWork', workInProgress)
     indent.number += 2
     switch (workInProgress.tag) {
+        // 组件有函数组件和类组件 他们都是函数 在这里还区分不开
+        case IndeterminateComponent:
+            return mountIndeterminateComponent(current,workInProgress,workInProgress.type)
         case HostRoot:
             return updateHostRoot(current, workInProgress)
         case HostComponent:

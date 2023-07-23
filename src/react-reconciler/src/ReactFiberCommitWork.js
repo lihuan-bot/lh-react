@@ -2,13 +2,13 @@
  * @Author: lihuan
  * @Date: 2023-07-21 16:55:08
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-22 22:04:53
+ * @LastEditTime: 2023-07-23 16:38:26
  * @Email: 17719495105@163.com
  */
 
 import { MutationMask, Placement } from "./ReactFiberFlags";
-import { HostComponent, HostRoot, HostText } from "./ReactWorkTags";
-import { appendChild } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
+import { FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
+import { appendChild, insertBefore } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
 
 
 
@@ -50,23 +50,56 @@ function getHostParentFiber(fiber) {
  * @param {*} parent 父真实dom节点
  * @return {*}
  */
-function insertNode(node, parent) {
+function insertOrAppendPlacementNode(node, before, parent) {
     const { tag } = node
     // 判断此fiber节点是不是真实dom节点
     const isHost = tag === HostComponent || tag === HostText
     if (isHost) {
         const { stateNode } = node
-        appendChild(parent,stateNode)
+        if (before) {
+            insertBefore(parent, stateNode, before)
+        } else {
+            appendChild(parent, stateNode)
+        }
     } else {
         // 如果node不是真实dom节点 获取他的大儿子
         const { child } = node
         if (child !== null) {
-            insertNode(node, parent)
+            insertOrAppendPlacementNode(child, before, parent)
             let { sibling } = child
             while (sibling !== null) {
-                insertNode(sibling, parent)
+                insertOrAppendPlacementNode(sibling, before, parent)
                 sibling = sibling.sibling
             }
+        }
+    }
+}
+/**
+ * @description: 找到要插入的锚点
+ * @param {*} fiber
+ * @return {*}
+ */
+function getHostSibling(fiber) {
+    let node = fiber
+    siblings: while (true) {
+        while (node.sibling === null) {
+            if (node.return === null || isHostParent(node.return)) {
+                return null;
+            }
+            node = node.return;
+        }
+        node = node.sibling
+        // 如果弟弟不是原生节点 也不是文本节点
+        while (node.tag !== HostComponent && node.tag !== HostText) {
+            // 如果此节点是一个将要插入的新的节点 找他的弟弟
+            if (node.tag & Placement) {
+                continue siblings;
+            } else {
+                node = node.child
+            }
+        }
+        if (!(node.flags & Placement)) {
+            return node.stateNode
         }
     }
 }
@@ -80,12 +113,14 @@ function commitPlacement(finishedWork) {
     switch (parentFiber.tag) {
         case HostRoot:{
             const parent = parentFiber.stateNode.containerInfo
-            insertNode(finishedWork, parent)
+            const before = getHostSibling(finishedWork)
+            insertOrAppendPlacementNode(finishedWork, before,parent)
             break;
             }
         case HostComponent: {
             const parent = parentFiber.stateNode
-            insertNode(finishedWork, parent)
+            const before = getHostSibling(finishedWork)
+            insertOrAppendPlacementNode(finishedWork, before,parent)
             break;
             }
         default:
@@ -100,6 +135,7 @@ function commitPlacement(finishedWork) {
  */
 export function commitMutationEffectOnFiber(finishedWork,root) {
     switch (finishedWork.tag) {
+        case FunctionComponent:
         case HostRoot:
         case HostComponent:
         case HostText: {
