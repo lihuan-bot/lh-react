@@ -2,10 +2,11 @@
  * @Author: lihuan
  * @Date: 2023-07-19 13:23:49
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-23 01:53:32
+ * @LastEditTime: 2023-07-31 14:26:35
  * @Email: 17719495105@163.com
  */
 import { setInitialProperties } from './ReactDOMComponent'
+import { precacheFiberNode, updateFiberProps } from './ReactDOMComponentTree'
 export function shouldSetTextContent(type, props) {
     return typeof props.children === 'string' || typeof props.children === 'number'
 }
@@ -14,9 +15,11 @@ export function createTextInstance(content) {
     return document.createTextNode(content)
 }
 
-export function createInstance(type, props) {
+export function createInstance(type, props, internalInstanceHandle) {
     const domElement = document.createElement(type)
-    // TODO: 更新属性
+    precacheFiberNode(internalInstanceHandle, domElement)
+    // 那属性保存在domElement的属性上
+    updateFiberProps(domElement, props)
     return domElement
 }
 

@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-09 01:42:15
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-27 15:20:28
+ * @LastEditTime: 2023-07-31 13:36:18
  * @Email: 17719495105@163.com
  */
 import { createContainer, updateContainer } from 'react-reconciler/src/ReactFiberReconciler'
@@ -14,6 +14,7 @@ function ReactDOMRoot(internalRoot) {
 ReactDOMRoot.prototype.render = function (children) {
 
     const root = this._internalRoot
+    root.containerInfo.innerHTML = ''
     updateContainer(children,root)
     
 }
