@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-27 13:07:37
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-31 15:57:43
+ * @LastEditTime: 2023-08-01 14:41:53
  * @Email: 17719495105@163.com
  */
 
@@ -65,8 +65,39 @@ export function dispatchEventForPluginEventSystem(domEventName, eventSystemFlags
 function dispatchEventForPlugins(domEventName,eventSystemFlags,nativeEvent,targetInst,targetContainer) {
     const nativeEventTarget = getEventTarget(nativeEvent)
     const dispatchQueue = []
-    extractEvents(dispatchQueue,domEventName,targetInst,nativeEvent,nativeEventTarget,eventSystemFlags,targetContainer)
+    extractEvents(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget, eventSystemFlags, targetContainer)
+    processDispatchQueue(dispatchQueue,eventSystemFlags)
+    
 }
+function processDispatchQueue(dispatchQueue,eventSystemFlags) {
+    const isCapturePhase = (eventSystemFlags & IS_CAPTURE_PHASE) !== 0
+    for (let i = 0; i < dispatchQueue.length; i++) {
+        const { event, listeners } = dispatchQueue[i];
+        processDispatchQueueItemsInOrder(event, listeners, isCapturePhase)
+    }
+}
+function executeDispatch(event,listener, currentTarget) {
+    // currentTarget合成事件类型是不断变化的
+    // event nativeEventTarget 是原始事件源是不变的
+    // event currentTarget 当前事件源 会随着事件回调的执行不断变化的
+    event.currentTarget = currentTarget
+    listener(event)
+}
+function processDispatchQueueItemsInOrder(event, listeners, isCapturePhase) {
+    if (isCapturePhase) { // listeners [子 ,父]
+        for (let i = listeners.length - 1; i >= 0; i--) {
+            const { listener, currentTarget } = listeners[i]
+            if (event.isPropagationStopped()) return
+            executeDispatch(event,listener, currentTarget)
+        }
+    } else {
+        for (let i = 0; i < listeners.length; i++) {
+            const { listener, currentTarget } = listeners[i]
+            if (event.isPropagationStopped()) return
+            executeDispatch(event,listener, currentTarget)
+        }
+    }
+} 
 
 function extractEvents(dispatchQueue,domEventName,targetInst,nativeEvent,nativeEventTarget,eventSystemFlags,targetContainer) {
     SimpleEventPlugin.extractEvents(dispatchQueue,domEventName,targetInst,nativeEvent,nativeEventTarget,eventSystemFlags,targetContainer)
@@ -83,11 +114,15 @@ export function accumulateSinglePhaseListeners(targetFiber,reactName,nativeEvent
             if (reactEventName !== null) {
                 const listener = getListener(instance, reactEventName)
                 if (listener) {
-                    listeners.push(listener)
+                    listeners.push(createDispatchedListener(instance, listener,stateNode))
                 }
             }
         }
         instance = instance.return
     }
     return listeners
+}
+
+function createDispatchedListener(instance, listener,currentTarget) {
+    return { instance, listener, currentTarget }
 }

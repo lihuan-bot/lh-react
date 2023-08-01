@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-08 10:36:06
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-31 09:55:23
+ * @LastEditTime: 2023-08-01 14:46:49
  * @Email: 17719495105@163.com
  */
 import { createRoot } from 'react-dom/client'
@@ -11,14 +11,14 @@ import { createRoot } from 'react-dom/client'
 //         hello <span style={{ color: 'red' }}>world</span>
 //     </h1>
 // )
-function FunctionsComponent() {
+function FunctionComponent() {
     return  (
-        < h1 onClick={(e)=> {console.log(1)}}>
+        < h1 onClick={(e)=> {console.log(1,e)}}>
             hello <span style={{ color: 'red' }}>world</span>
         </h1>
     )
 }
-const element = <FunctionsComponent />
+const element = <FunctionComponent />
 debugger
 const root = createRoot(document.getElementById('root'))
 console.log(root)
