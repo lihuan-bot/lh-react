@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-13 11:13:07
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-22 22:05:45
+ * @LastEditTime: 2023-08-06 08:50:02
  * @Email: 17719495105@163.com
  */
 import { scheduleCallback } from 'scheduler'
@@ -11,12 +11,16 @@ import { beginWork } from './ReactFiberBeginWork'
 import { completeWork } from './ReactFiberCompleteWork'
 import { NoFlags, MutationMask } from './ReactFiberFlags'
 import { commitMutationEffectOnFiber } from './ReactFiberCommitWork'
+import { finishQueueingConcurrentUpdates } from './ReactFiberConcurrentUpdates'
 let workInProgress = null
+let workInProgressRoot = null
 export function scheduleUpdateOnFiber(root) {
     // 确保调度执行root上的更新
     ensureRootIsScheduled(root)
 }
 function ensureRootIsScheduled(root) {
+    if (workInProgressRoot) return
+    workInProgressRoot = root
     scheduleCallback(performConcurrentWorkOnFiber.bind(null,root))
 }
 
@@ -32,6 +36,7 @@ function performConcurrentWorkOnFiber(root) {
     const finishedWork = root.current.alternate
     root.finishedWork = finishedWork
     commitRoot(root)
+    workInProgressRoot = null
 }
 function commitRoot(root) {
     const { finishedWork } = root
@@ -46,7 +51,8 @@ function commitRoot(root) {
     root.current = finishedWork
 }
 function prepareFreshStack(root) {
-    workInProgress = createWorkInProgress(root.current,null)
+    workInProgress = createWorkInProgress(root.current, null)
+    finishQueueingConcurrentUpdates()
 }
 function renderRootSync(root) {
     // 开始构建fiber

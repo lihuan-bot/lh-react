@@ -2,13 +2,13 @@
  * @Author: lihuan
  * @Date: 2023-07-20 09:43:01
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-22 22:08:37
+ * @LastEditTime: 2023-08-06 18:41:56
  * @Email: 17719495105@163.com
  */
 import logger, { indent } from 'shared/logger'
 import { HostComponent, HostText, HostRoot } from './ReactWorkTags';
-import { createTextInstance, createInstance, appendInitialChild, finalizeInitialChildren } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
-import { NoFlags } from './ReactFiberFlags';
+import { createTextInstance, createInstance, appendInitialChild, finalizeInitialChildren, prepareUpdate } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
+import { NoFlags, Update } from './ReactFiberFlags';
 /**
  * @description: 把当前完成的fiber所有子节点对应的真实dom挂到自己父parent真实dom节点上
  * @param {*} parent 当前完成的fiber的真实dom
@@ -40,6 +40,19 @@ function appendAllChildren(parent, workInProgress) {
        node = node.sibling
     }
 }
+function markUpdate(workInProgress) {
+    workInProgress.flags |= Update
+}
+function updateHostComponent(current,workInProgress,type,newProps) {
+    const oldProps = current.memoizedProps
+    const instance = workInProgress.stateNode
+    const updatePayload = prepareUpdate(instance, type, oldProps, newProps)
+    console.log(updatePayload,'updatePayload')
+    workInProgress.updateQueue = updatePayload
+    if(updatePayload) {
+        markUpdate(workInProgress)
+    }
+}
 /**
  * @description: 完成一个fiber节点
  * @param {*} current 老fiber
@@ -48,7 +61,7 @@ function appendAllChildren(parent, workInProgress) {
  */
 export function completeWork(current, workInProgress) {
     indent.number -= 2
-    logger(' '.repeat(indent.number) + 'completeWork', workInProgress)
+    // logger(' '.repeat(indent.number) + 'completeWork', workInProgress)
     const newProps = workInProgress.pendingProps
     switch (workInProgress.tag) {
         case HostRoot:
@@ -57,11 +70,16 @@ export function completeWork(current, workInProgress) {
         case HostComponent:
             // 目前只是挂载和创建 后面要区分初次挂载和更新
             const { type } = workInProgress
-            const instance = createInstance(type, newProps, workInProgress)
-            // 把自己所有儿子都挂到自己身上
-            appendAllChildren(instance,workInProgress)
-            workInProgress.stateNode = instance
-            finalizeInitialChildren(instance,type,newProps)
+            if (current !== null && workInProgress.stateNode !== null) {
+                updateHostComponent(current, workInProgress, type, newProps)
+            } else {
+                const instance = createInstance(type, newProps, workInProgress)
+                // 把自己所有儿子都挂到自己身上
+                appendAllChildren(instance,workInProgress)
+                workInProgress.stateNode = instance
+                finalizeInitialChildren(instance,type,newProps)
+            }
+           
             bubbleProperties(workInProgress)
             break
         case HostText:

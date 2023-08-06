@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-09 11:22:35
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-19 13:43:36
+ * @LastEditTime: 2023-08-06 10:12:49
  * @Email: 17719495105@163.com
  */
 import { HostComponent, HostRoot, IndeterminateComponent, HostText } from './ReactWorkTags'
@@ -98,7 +98,7 @@ function createFiberFromTypeAndProps(type, key, penddingProps) {
     return fiber
 }
 
-export function createFiberFroText(content) {
+export function createFiberFromText(content) {
     const fiber = createFiber(HostText, content, null)
     return fiber
 

@@ -2,12 +2,12 @@
  * @Author: lihuan
  * @Date: 2023-07-16 22:35:29
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-19 13:44:29
+ * @LastEditTime: 2023-08-06 15:59:04
  * @Email: 17719495105@163.com
  */
 
 import { REACT_ELEMENT_TYPE } from "shared/ReactSymbols";
-import { createFiberFromElement, createFiberFroText } from './ReactFiber'
+import { createFiberFromElement, createFiberFromText, createWorkInProgress } from './ReactFiber'
 import { Placement } from './ReactFiberFlags'
 import isArray from 'shared/isArray'
 
@@ -17,15 +17,42 @@ import isArray from 'shared/isArray'
  * @return {*}
  */
 function createChildReconciler(shouldTrackSideEffects) {
-    function reconcileSingleElement(returnFiber, currentFirstFiber, element) {
-        // 实现的挂载 所以currentFirstFiber没有 所以可以直接根据虚拟dom生成fiber节点
+    function useFiber(fiber, pendingProps) {
+        const clone = createWorkInProgress(fiber, pendingProps)
+        clone.index = 0
+        clone.sibling = null
+        return clone
+    }
+    /**
+     * @description: 
+     * @param {*} returnFiber 根fiber div#root 对应的fiber
+     * @param {*} currentFirstChild 老的functionComponent对应的fiber
+     * @param {*} element 新的虚拟dom对象
+     * @return {*} 返回新的第一个子fiber
+     */    
+    function reconcileSingleElement(returnFiber, currentFirstChild, element) {
+        const key = element.key
+        const child = currentFirstChild // 老的functionComponent对应的fiber
+        while (child !== null) {
+            // 老的fiber对应的key和新的虚拟dom的key是否一致
+            if (child.key === key) {
+                 // 老的fiber对应的类型和新的虚拟dom的类型是否一致
+                if (child.type === element.type) {
+                    // key和type都一样 可以复用
+                    const existing = useFiber(child, element.props)
+                    existing.return = returnFiber
+                    return existing
+                }
+            }
+            child = child.sibling
+        }
+        // 实现的挂载 所以currentFirstChild没有 所以可以直接根据虚拟dom生成fiber节点
         const created = createFiberFromElement(element)
         created.return = returnFiber
         return created
     }
     function placeSingleChild(newFiber) {
-
-        if (shouldTrackSideEffects) {
+        if (shouldTrackSideEffects && newFiber.alternate === null) {
             // 添加副作用
             newFiber.flags |= Placement
         }
@@ -33,7 +60,7 @@ function createChildReconciler(shouldTrackSideEffects) {
     }
     function createChild(returnFiber,newChild) {
         if ((typeof newChild === 'string' && newChild !== '') || typeof newChild === 'number') {
-            const created = createFiberFroText(`${newChild}`)
+            const created = createFiberFromText(`${newChild}`)
             created.return = returnFiber
             return created
         }
@@ -60,7 +87,7 @@ function createChildReconciler(shouldTrackSideEffects) {
         }
         return newFiber
     }
-    function reconcileChildrenArray(returnFiber,currentFirstFiber,newChild) {
+    function reconcileChildrenArray(returnFiber,currentFirstChild,newChild) {
         let resultingFirstFiber = null // 返回的第一个新儿子
         let previousNewFiber = null // 上一个新的fiber
         let newIdnex = 0
@@ -83,17 +110,17 @@ function createChildReconciler(shouldTrackSideEffects) {
     /**
      * @description: 比较子fibers dom-diff
      * @param {*} returnFiber 新的父fiber
-     * @param {*} currentFirstFiber 老fiber第一个子fiber
+     * @param {*} currentFirstChild 老fiber第一个子fiber
      * @param {*} newChild 新的子虚拟dom h1虚拟dom
      * @return {*}
      */
-    function reconcileChildFibers(returnFiber, currentFirstFiber, newChild) {
+    function reconcileChildFibers(returnFiber, currentFirstChild, newChild) {
         //新节点只有一个的情况
         if (typeof newChild === 'object' && newChild !== null) {
             switch (newChild.$$typeof) {
                 case REACT_ELEMENT_TYPE:
                     
-                    return placeSingleChild(reconcileSingleElement(returnFiber,currentFirstFiber,newChild))
+                    return placeSingleChild(reconcileSingleElement(returnFiber,currentFirstChild,newChild))
             
                 default:
                     break;
@@ -101,7 +128,7 @@ function createChildReconciler(shouldTrackSideEffects) {
         }
         // newChild 是 【hellow文本节点，span虚拟dom节点】
         if (isArray(newChild)) {
-            return reconcileChildrenArray(returnFiber,currentFirstFiber,newChild)
+            return reconcileChildrenArray(returnFiber,currentFirstChild,newChild)
         }
         return null
     }

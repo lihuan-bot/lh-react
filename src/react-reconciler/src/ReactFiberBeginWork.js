@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-13 16:51:46
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-23 16:43:36
+ * @LastEditTime: 2023-08-06 18:43:14
  * @Email: 17719495105@163.com
  */
 import logger,{ indent } from 'shared/logger'
@@ -63,6 +63,11 @@ export function mountIndeterminateComponent(current, workInProgress, Component) 
     reconcileChildren(current, workInProgress, value)
     return workInProgress.child
 }
+function updateFunctionComponent(current, workInProgress, Component, nextProps) {
+    const nextChildren = renderWithHooks(current, workInProgress, Component,nextProps)
+    reconcileChildren(current, workInProgress, nextChildren)
+    return workInProgress.child
+}
 /**
  * @description: 目标根据新的虚拟dom构建新的fiber子链表 child.sibling
  * @param {*} current 老fiber
@@ -70,12 +75,16 @@ export function mountIndeterminateComponent(current, workInProgress, Component) 
  * @return {*}
  */
 export function beginWork(current, workInProgress) {
-    logger(' '.repeat(indent.number) + 'beginWork', workInProgress)
+    // logger(' '.repeat(indent.number) + 'beginWork', workInProgress)
     indent.number += 2
     switch (workInProgress.tag) {
         // 组件有函数组件和类组件 他们都是函数 在这里还区分不开
         case IndeterminateComponent:
-            return mountIndeterminateComponent(current,workInProgress,workInProgress.type)
+            return mountIndeterminateComponent(current, workInProgress, workInProgress.type)
+        case FunctionComponent: 
+            const Component = workInProgress.type
+            const nextProps = workInProgress.pendingProps
+            return updateFunctionComponent(current,workInProgress,Component,nextProps)
         case HostRoot:
             return updateHostRoot(current, workInProgress)
         case HostComponent:
