@@ -2,11 +2,11 @@
  * @Author: lihuan
  * @Date: 2023-07-20 09:43:01
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-06 18:41:56
+ * @LastEditTime: 2023-08-07 10:48:37
  * @Email: 17719495105@163.com
  */
 import logger, { indent } from 'shared/logger'
-import { HostComponent, HostText, HostRoot } from './ReactWorkTags';
+import { HostComponent, HostText, HostRoot, FunctionComponent } from './ReactWorkTags';
 import { createTextInstance, createInstance, appendInitialChild, finalizeInitialChildren, prepareUpdate } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
 import { NoFlags, Update } from './ReactFiberFlags';
 /**
@@ -64,6 +64,9 @@ export function completeWork(current, workInProgress) {
     // logger(' '.repeat(indent.number) + 'completeWork', workInProgress)
     const newProps = workInProgress.pendingProps
     switch (workInProgress.tag) {
+        case FunctionComponent:
+            bubbleProperties(workInProgress);
+            break;
         case HostRoot:
             bubbleProperties(workInProgress);
             break;

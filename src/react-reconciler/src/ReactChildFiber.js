@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-16 22:35:29
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-06 15:59:04
+ * @LastEditTime: 2023-08-07 09:55:27
  * @Email: 17719495105@163.com
  */
 
@@ -32,7 +32,7 @@ function createChildReconciler(shouldTrackSideEffects) {
      */    
     function reconcileSingleElement(returnFiber, currentFirstChild, element) {
         const key = element.key
-        const child = currentFirstChild // 老的functionComponent对应的fiber
+        let child = currentFirstChild // 老的functionComponent对应的fiber
         while (child !== null) {
             // 老的fiber对应的key和新的虚拟dom的key是否一致
             if (child.key === key) {

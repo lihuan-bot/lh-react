@@ -2,13 +2,13 @@
  * @Author: lihuan
  * @Date: 2023-07-21 16:55:08
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-23 16:38:26
+ * @LastEditTime: 2023-08-07 10:33:50
  * @Email: 17719495105@163.com
  */
 
-import { MutationMask, Placement } from "./ReactFiberFlags";
+import { MutationMask, Placement, Update } from "./ReactFiberFlags";
 import { FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
-import { appendChild, insertBefore } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
+import { appendChild, insertBefore, commitUpdate } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
 
 
 
@@ -133,16 +133,38 @@ function commitPlacement(finishedWork) {
  * @param {*} root 根节点
  * @return {*}
  */
-export function commitMutationEffectOnFiber(finishedWork,root) {
+export function commitMutationEffectOnFiber(finishedWork, root) {
+    const current = finishedWork.alternate
+    const flags = finishedWork.flags
     switch (finishedWork.tag) {
         case FunctionComponent:
         case HostRoot:
-        case HostComponent:
         case HostText: {
             // 先遍历他们的子节点 处理他们子节点上的副作用
             recursivelyTraverseMutationEffects(root, finishedWork)
             // 在处理自己身上的副作用
             commitReconciliationEffects(finishedWork)
+            break;
+        }
+        case HostComponent: {
+               // 先遍历他们的子节点 处理他们子节点上的副作用
+            recursivelyTraverseMutationEffects(root, finishedWork)
+            // 在处理自己身上的副作用
+            commitReconciliationEffects(finishedWork)
+            if (flags & Update) {
+                const instance = finishedWork.stateNode
+                if (instance !== null) {
+                    const newProps = finishedWork.memoizedProps
+                    const oldProps = current !== null ? current.memoizedProps : newProps
+                    const type = finishedWork.type
+                    const updatePayload = finishedWork.updateQueue
+                    finishedWork.updateQueue = null
+                    if (updatePayload) {
+                        commitUpdate(instance,updatePayload,type,oldProps,newProps,finishedWork)
+                    }
+
+                }
+            }
             break;
         }
         default:

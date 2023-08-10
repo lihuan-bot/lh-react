@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-09 11:22:35
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-06 10:12:49
+ * @LastEditTime: 2023-08-07 11:01:40
  * @Email: 17719495105@163.com
  */
 import { HostComponent, HostRoot, IndeterminateComponent, HostText } from './ReactWorkTags'
@@ -29,7 +29,7 @@ export function FiberNode(tag, pendingProps, key) {
     this.memoizedProps = null  // 已经生效的属性
     // 每个fiber还会有自己的状态每一种fiber状态存的类型不一样
     //类组件存的是类的实例 HostRoot存的是渲染的元素
-    this.memozedState = null
+    this.memoizedState = null
 
     this.updateQueue = null
     // 副作用标识

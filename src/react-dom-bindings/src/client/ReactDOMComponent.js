@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-21 10:17:03
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-06 22:12:46
+ * @LastEditTime: 2023-08-07 09:57:16
  * @Email: 17719495105@163.com
  */
 import { setValueForStyles } from './CSSPropertyOperations'
@@ -102,4 +102,21 @@ export function diffProperties(domElement, tag, lastProps, nextProps) {
         (updatePayload = updatePayload || []).push(STYLE,styleUpdates)
     }
     return updatePayload
+}
+
+export function updateProperties(domElement,updatePayload) {
+    updateDOMProperties(domElement,updatePayload)
+}
+function updateDOMProperties(domElement, updatePayload) {
+    for (let i = 0; i < updatePayload.length; i+=2) {
+        const propKey = updatePayload[i];
+        const propValue = updatePayload[i+1];
+        if (propKey === STYLE) {
+            setValueForStyles(domElement,propValue);
+        } else if (propKey === CHILDREN) {
+            setTextContent(domElement,propValue)
+        } else {
+            setValueForProperty(domElement,propKey,propValue)
+        }
+    }
 }

@@ -2,10 +2,10 @@
  * @Author: lihuan
  * @Date: 2023-07-19 13:23:49
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-06 18:07:33
+ * @LastEditTime: 2023-08-07 10:33:18
  * @Email: 17719495105@163.com
  */
-import { setInitialProperties, diffProperties } from './ReactDOMComponent'
+import { setInitialProperties, diffProperties, updateProperties } from './ReactDOMComponent'
 import { precacheFiberNode, updateFiberProps } from './ReactDOMComponentTree'
 export function shouldSetTextContent(type, props) {
     return typeof props.children === 'string' || typeof props.children === 'number'
@@ -42,4 +42,9 @@ export function insertBefore(parentInstance, child, beforeChild) {
 export function prepareUpdate(domElement, tag, lastProps, nextProps) {
     return diffProperties(domElement, tag, lastProps, nextProps)
     
+}
+
+export function commitUpdate(domElement, updatePayload, type, oldProps, newProps) {
+    updateProperties(domElement, updatePayload, type, oldProps, newProps)
+    updateFiberProps(domElement,newProps)
 }
