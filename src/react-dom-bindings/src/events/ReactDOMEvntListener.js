@@ -2,13 +2,13 @@
  * @Author: lihuan
  * @Date: 2023-07-30 13:03:22
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-31 14:18:55
+ * @LastEditTime: 2023-08-14 10:53:14
  * @Email: 17719495105@163.com
  */
 import getEventTarget from './getEventTarget'
 import { getClosestInstanceFromNode } from '../client/ReactDOMComponentTree'
 import { dispatchEventForPluginEventSystem } from './DOMPluginEventSystem'
-export function createEventListenerWrapperWithPriority(targetContainer, domEventName,eventSystemFlags) {
+export function createEventListenerWrapperWithPriority(targetContainer, domEventName,isCapturePhase,eventSystemFlags) {
     
     const listenerWrapper = dispatchDiscreteEvent
     return listenerWrapper.bind(null,domEventName,eventSystemFlags,targetContainer)
@@ -30,4 +30,5 @@ export function dispatchEvent(domEventName, eventSystemFlags, container, nativeE
     const nativeEventTarget = getEventTarget(nativeEvent)
     const targetInst = getClosestInstanceFromNode(nativeEventTarget)
     dispatchEventForPluginEventSystem(domEventName,eventSystemFlags,nativeEvent,targetInst,container)
+    
 } 

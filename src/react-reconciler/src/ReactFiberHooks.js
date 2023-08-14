@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-23 16:42:59
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-06 18:01:51
+ * @LastEditTime: 2023-08-14 11:07:00
  * @Email: 17719495105@163.com
  */
 import ReactSharedInternals from 'shared/ReactSharedInternals'
@@ -125,5 +125,6 @@ export function renderWithHooks(current, workInProgress, Component, props) {
     const children = Component(props)
     currentlyRenderingFiber = null
     workInProgressHook = null
+    currentHook = null
     return children
 }

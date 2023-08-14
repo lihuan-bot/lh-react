@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-27 13:07:37
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-01 14:41:53
+ * @LastEditTime: 2023-08-14 10:48:40
  * @Email: 17719495105@163.com
  */
 
@@ -40,10 +40,11 @@ export function listenToNativeEvent(domEventName, isCapturePhaseListener, target
     if (isCapturePhaseListener) {
         eventSystemFlags |= IS_CAPTURE_PHASE
     }
-    addTrappedEvnetListener(target,domEventName, eventSystemFlags,isCapturePhaseListener)
+    addTrappedEvnetListener(target, domEventName, eventSystemFlags, isCapturePhaseListener)
 }
 function addTrappedEvnetListener(targetContainer, domEventName, eventSystemFlags, isCapturePhaseListener) {
-    const listener = createEventListenerWrapperWithPriority(targetContainer,domEventName, isCapturePhaseListener,eventSystemFlags)
+    const listener = createEventListenerWrapperWithPriority(targetContainer, domEventName, isCapturePhaseListener, eventSystemFlags)
+
     if (isCapturePhaseListener) {
         addEventCaptureListener(targetContainer,domEventName, listener)
     } else {
@@ -99,7 +100,7 @@ function processDispatchQueueItemsInOrder(event, listeners, isCapturePhase) {
     }
 } 
 
-function extractEvents(dispatchQueue,domEventName,targetInst,nativeEvent,nativeEventTarget,eventSystemFlags,targetContainer) {
+function extractEvents(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget, eventSystemFlags, targetContainer) {
     SimpleEventPlugin.extractEvents(dispatchQueue,domEventName,targetInst,nativeEvent,nativeEventTarget,eventSystemFlags,targetContainer)
 }
 
