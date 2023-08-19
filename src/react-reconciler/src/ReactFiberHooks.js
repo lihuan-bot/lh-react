@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-23 16:42:59
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-14 11:07:00
+ * @LastEditTime: 2023-08-19 22:16:42
  * @Email: 17719495105@163.com
  */
 import ReactSharedInternals from 'shared/ReactSharedInternals'
@@ -13,10 +13,12 @@ let currentlyRenderingFiber = null
 let workInProgressHook = null
 let currentHook = null
 const HooksDispatcherOnMount = {
-    useReducer: mountReducer
+    useReducer: mountReducer,
+    useState: mountState,
 }
 const HooksDispatcherOnUpdate = {
-    useReducer: updateReducer
+    useReducer: updateReducer,
+    useState: updateState,
 }
 /**
  * @description: 构建新hooks
@@ -42,6 +44,45 @@ function updateWorkInProgressHook() {
     }
     return workInProgressHook
 }
+function baseStateReducer(state,action) {
+ return typeof action === 'function' ? action(state) : action
+}
+function updateState() {
+    return updateReducer(baseStateReducer)
+}
+function mountState(initialState) {
+    const hook = mountWorkInProgressHook()
+    hook.memoizedState = initialState
+    const queue = {
+        pending: null,
+        dispatch: null,
+        lastRenderedReducer: baseStateReducer, 
+        lastRenderedState: initialState
+
+    }
+    hook.queue = queue
+    const dispatch = (queue.dispatch = dispatchSetState.bind(null, currentlyRenderingFiber, queue))
+    return [hook.memoizedState,dispatch]
+}
+function dispatchSetState(fiber,queue,action) {
+      const update = {
+          action, 
+          hasEaferState: false, // 是否有急切的更新
+          eagerState: null, // 急切的更新状态
+          next: null,
+      }
+    // 没有像更新一样复用mountReducer 为了做个优化 当状态不变时跳过更新
+    // 当派发动作时立即用上一次的状态和reducer计算状态
+    const { lastRenderedReducer, lastRenderedState } = queue
+    const eagerState = lastRenderedReducer(lastRenderedState, action)
+    update.hasEaferState = true
+    update.eagerState = eagerState
+    if (Object.is(eagerState, lastRenderedState)) {
+        return
+    }
+    const root = enqueueConcurrentHookUpdate(fiber, queue, update)
+    scheduleUpdateOnFiber(root)
+}
 function updateReducer(reducer) {
     const hook = updateWorkInProgressHook()
     const queue = hook.queue
@@ -55,8 +96,12 @@ function updateReducer(reducer) {
         const firstUpdate = pendingQueue.next
         let update = firstUpdate
         do {
-            const action = update.action
-            newState = reducer(newState, action)
+            if (update.hasEaferState) {
+                newState = update.eagerState
+            } else {
+                const action = update.action
+                newState = reducer(newState, action)
+            }
             update = update.next
         } while (update !== null && update !== firstUpdate);
     }

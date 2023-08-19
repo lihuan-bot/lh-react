@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-08-01 20:57:02
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-01 21:07:23
+ * @LastEditTime: 2023-08-19 21:42:45
  * @Email: 17719495105@163.com
  */
 import ReactCurrentDispatcher from './ReactCurrentDispatcher'
@@ -20,4 +20,9 @@ function resolveDispatcher() {
 export function useReducer(reducer,initalArg) {
     const dispatcher = resolveDispatcher()
     return dispatcher.useReducer(reducer,initalArg)
+}
+
+export function useState(initialState) {
+    const dispatcher = resolveDispatcher()
+    return dispatcher.useState(initialState)
 }
