@@ -2,13 +2,13 @@
  * @Author: lihuan
  * @Date: 2023-07-16 22:35:29
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-07 09:55:27
+ * @LastEditTime: 2023-10-26 19:35:54
  * @Email: 17719495105@163.com
  */
 
 import { REACT_ELEMENT_TYPE } from "shared/ReactSymbols";
 import { createFiberFromElement, createFiberFromText, createWorkInProgress } from './ReactFiber'
-import { Placement } from './ReactFiberFlags'
+import { Placement, ChildDeletion } from './ReactFiberFlags'
 import isArray from 'shared/isArray'
 
 /**
@@ -22,6 +22,16 @@ function createChildReconciler(shouldTrackSideEffects) {
         clone.index = 0
         clone.sibling = null
         return clone
+    }
+    function deleteChild(returnFiber,childToDelete) {
+        if (!shouldTrackSideEffects) return
+        const deletions = returnFiber.deletions
+        if (deletions===null) {
+            returnFiber.deletions = [childToDelete]
+            returnFiber.flags |=  ChildDeletion
+        } else {
+            returnFiber.deletions.push(childToDelete)
+        }
     }
     /**
      * @description: 
@@ -43,6 +53,8 @@ function createChildReconciler(shouldTrackSideEffects) {
                     existing.return = returnFiber
                     return existing
                 }
+            } else {
+                deleteChild(returnFiber,child)
             }
             child = child.sibling
         }

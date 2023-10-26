@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-08 11:46:07
  * @LastEditors: lihuan
- * @LastEditTime: 2023-07-19 09:26:06
+ * @LastEditTime: 2023-10-26 19:14:40
  * @Email: 17719495105@163.com
  */
 import hasOwnProperty from 'shared/hasOwnProperty'
@@ -30,13 +30,13 @@ function ReactElement(type, key, ref, props) {
         props
     }
 }
-export function jsxDEV(type, config) {
+export function jsxDEV(type, config,maybeKey) {
     let propName
     const props = {}
     let key = null
     let ref = null
-    if (hasValidKey(config)) {
-        key = config.key
+    if (typeof maybeKey !=='undefined') {
+        key = maybeKey
     }
     if (hasValidRef(config)) {
         ref = config.ref

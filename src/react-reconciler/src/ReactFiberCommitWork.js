@@ -2,17 +2,54 @@
  * @Author: lihuan
  * @Date: 2023-07-21 16:55:08
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-07 10:33:50
+ * @LastEditTime: 2023-10-26 21:20:27
  * @Email: 17719495105@163.com
  */
 
 import { MutationMask, Placement, Update } from "./ReactFiberFlags";
 import { FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
 import { appendChild, insertBefore, commitUpdate } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
+let hostParent = null
 
 
+function commitDeletionEffects(root, returnFiber, deleteFiber) {
+    let parent = returnFiber
+    findParent: while (parent !==null) {
+        switch (parent.tag) {
+            case HostComponent: {
+                hostParent = parent.stateNode
+                break findParent;
+            }
+            case HostRoot: {
+                hostParent = parent.stateNode.containerInfo
+                break findParent
+            }
+        }
+        parent = parent.return
 
-function recursivelyTraverseMutationEffects(root,parentFiber) {
+    }
+    commitDeletionEffectsOnFiber(root, returnFiber, deleteFiber)
+    hostParent =null
+}
+function commitDeletionEffectsOnFiber(root, returnFiber, deleteFiber) {
+
+}
+/**
+ * @description: 递归处理变更的作用
+ * @param {*} root
+ * @param {*} parentFiber
+ * @return {*}
+ */
+function recursivelyTraverseMutationEffects(root, parentFiber) {
+    // 先把父fiber上该删除的节点删除
+    const deletions = parentFiber.deletions
+    if (deletions !== null) {
+        for (let i = 0; i < deletions.length; i++) {
+            const childToDelete = deletions[i]
+            commitDeletionEffects(root, parentFiber, childToDelete)
+        }
+    }
+    // 处理剩下的子节点
     if (parentFiber.subtreeFlags & MutationMask) {
         let { child } = parentFiber
 

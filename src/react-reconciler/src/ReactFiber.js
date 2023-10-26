@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-09 11:22:35
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-07 11:01:40
+ * @LastEditTime: 2023-10-26 19:36:01
  * @Email: 17719495105@163.com
  */
 import { HostComponent, HostRoot, IndeterminateComponent, HostText } from './ReactWorkTags'
@@ -38,6 +38,8 @@ export function FiberNode(tag, pendingProps, key) {
     this.subtreeFlags = NoFlags
     this.alternate = null
     this.index = 0
+    //存放将要删除的子fiber
+    this.deletions = null
 }
 export function createFiber(tag, pendingProps, key) {
     return new FiberNode(tag, pendingProps, key)
