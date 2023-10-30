@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-16 22:35:29
  * @LastEditors: lihuan
- * @LastEditTime: 2023-10-26 19:35:54
+ * @LastEditTime: 2023-10-30 11:19:18
  * @Email: 17719495105@163.com
  */
 
@@ -33,6 +33,15 @@ function createChildReconciler(shouldTrackSideEffects) {
             returnFiber.deletions.push(childToDelete)
         }
     }
+    function deleteRemainingChildren(returnFiber,currentFirstChild) {   
+        if (!shouldTrackSideEffects) return
+        let childToDelete = currentFirstChild
+        while (childToDelete !== null) {
+            deleteChild(returnFiber, childToDelete)
+            childToDelete = childToDelete.sibling
+        }
+        return null
+    }
     /**
      * @description: 
      * @param {*} returnFiber 根fiber div#root 对应的fiber
@@ -48,10 +57,14 @@ function createChildReconciler(shouldTrackSideEffects) {
             if (child.key === key) {
                  // 老的fiber对应的类型和新的虚拟dom的类型是否一致
                 if (child.type === element.type) {
+                    deleteRemainingChildren(returnFiber,child.sibling)
                     // key和type都一样 可以复用
                     const existing = useFiber(child, element.props)
                     existing.return = returnFiber
                     return existing
+                } else {
+                    // 如果key一样的老fiber，但是类型不一样，不能复用，剩下的全部删除
+                    deleteRemainingChildren(returnFiber,child)
                 }
             } else {
                 deleteChild(returnFiber,child)

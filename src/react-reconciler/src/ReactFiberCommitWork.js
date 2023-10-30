@@ -2,13 +2,13 @@
  * @Author: lihuan
  * @Date: 2023-07-21 16:55:08
  * @LastEditors: lihuan
- * @LastEditTime: 2023-10-26 21:20:27
+ * @LastEditTime: 2023-10-30 10:58:19
  * @Email: 17719495105@163.com
  */
 
 import { MutationMask, Placement, Update } from "./ReactFiberFlags";
 import { FunctionComponent, HostComponent, HostRoot, HostText } from "./ReactWorkTags";
-import { appendChild, insertBefore, commitUpdate } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
+import { appendChild, insertBefore, commitUpdate, removeChild } from 'react-dom-bindings/src/client/ReactDOMHostConfig'
 let hostParent = null
 
 
@@ -31,8 +31,29 @@ function commitDeletionEffects(root, returnFiber, deleteFiber) {
     commitDeletionEffectsOnFiber(root, returnFiber, deleteFiber)
     hostParent =null
 }
-function commitDeletionEffectsOnFiber(root, returnFiber, deleteFiber) {
-
+function commitDeletionEffectsOnFiber(finishedRoot, nearstMountedAncestor, deleteFiber) {
+    switch (deleteFiber.tag) {
+        case HostComponent: 
+        case HostText: {
+            // 先递归删除它的子节点
+            recursivelyTraverseDeletionEffects(finishedRoot, nearstMountedAncestor, deleteFiber)
+            //删除自己
+            if (hostParent !== null) {
+                removeChild(hostParent, deleteFiber.stateNode)
+            }
+            break
+        }
+            
+        default:
+            break;
+    }
+}
+function recursivelyTraverseDeletionEffects(finishedRoot, nearstMountedAncestor, parent) {
+    let child = parent.child
+    while (child !== null) {
+        commitDeletionEffectsOnFiber(finishedRoot, nearstMountedAncestor, child)
+        child = child.sibling
+    }
 }
 /**
  * @description: 递归处理变更的作用
@@ -78,7 +99,7 @@ function getHostParentFiber(fiber) {
         if (isHostParent(parent)) {
             return parent
         }
-        parent = parent.parent
+        parent = parent.return
     }
 }
 /**

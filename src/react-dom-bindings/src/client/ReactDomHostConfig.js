@@ -2,7 +2,7 @@
  * @Author: lihuan
  * @Date: 2023-07-19 13:23:49
  * @LastEditors: lihuan
- * @LastEditTime: 2023-08-07 10:33:18
+ * @LastEditTime: 2023-10-28 19:56:10
  * @Email: 17719495105@163.com
  */
 import { setInitialProperties, diffProperties, updateProperties } from './ReactDOMComponent'
@@ -47,4 +47,8 @@ export function prepareUpdate(domElement, tag, lastProps, nextProps) {
 export function commitUpdate(domElement, updatePayload, type, oldProps, newProps) {
     updateProperties(domElement, updatePayload, type, oldProps, newProps)
     updateFiberProps(domElement,newProps)
+}
+
+export function removeChild(parentInstance, child) {
+    parentInstance.removeChild(child)
 }
